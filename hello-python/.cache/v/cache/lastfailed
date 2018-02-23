@@ -1,0 +1,4 @@
+{
+  "testRequest.py::MyTestCase::testProxy": true, 
+  "testRequest.py::MyTestCase::test_something": true
+}
