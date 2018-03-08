@@ -24,7 +24,7 @@ class DouyuTupianPipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
         image_path = [x for ok, x in results if ok]
 
-        os.rename(self.IMAGES_STORE + image_path[0], self.IMAGES_STORE + item["nickname"] + ".jpg")
+        os.rename(self.IMAGES_STORE + image_path[0].get("path"), self.IMAGES_STORE + item["nickname"] + ".jpg")
 
         item["image_path"] = self.IMAGES_STORE + item["nickname"] + ".jpg"
 
