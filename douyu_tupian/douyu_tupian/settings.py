@@ -69,7 +69,7 @@ ITEM_PIPELINES = {
    'douyu_tupian.pipelines.DouyuTupianPipeline': 300,
 }
 
-IMAGES_STORE = "D:/Python/python-projects/douyu_tupian/images/"
+IMAGES_STORE = "F:/Python/python-projects/douyu_tupian/images/"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
