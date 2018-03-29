@@ -11,7 +11,7 @@ import time
 """
 
 # 设置的环境变量没效，所以要设置executable_path属性
-driver = webdriver.PhantomJS(executable_path="F:\\Python\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe")
+driver = webdriver.PhantomJS(executable_path="D:\\Python\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe")
 # driver = webdriver.PhantomJS()
 driver.get("http://www.douban.com")
 
