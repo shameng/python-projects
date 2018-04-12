@@ -10,7 +10,7 @@ import pymongo
 from jd_spider.item_info_item import ItemInfoItem
 
 
-class JDBaseItemInfoPersistencePipeline(object):
+class JDBaseItemPersistencePipeline(object):
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
