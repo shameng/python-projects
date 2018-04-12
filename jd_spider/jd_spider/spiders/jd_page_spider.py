@@ -11,6 +11,13 @@ from jd_spider.item_info_item import ItemInfoItem
 
 class JDPageSpider(scrapy.Spider):
 
+    # 自定义配置
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'jd_spider.jd_pipeline.JDBaseItemInfoPersistencePipeline': 300,
+        }
+    }
+
     # 爬虫的名称
     name = "jd_page_spider"
 
@@ -33,5 +40,5 @@ class JDPageSpider(scrapy.Spider):
             item_data_sku = item.xpath("./div/@data-sku").extract()[0]
 
             item_info = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
-                                item_data_sku=item_data_sku)
+                                     item_data_sku=item_data_sku)
             yield item_info

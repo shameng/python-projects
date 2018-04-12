@@ -10,7 +10,7 @@ import pymongo
 from jd_spider.item_info_item import ItemInfoItem
 
 
-class JDBaseItemInfoPineline(object):
+class JDBaseItemInfoPersistencePipeline(object):
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -39,4 +39,4 @@ class JDBaseItemInfoPineline(object):
         return item
 
     def _process_item_info(self, item):
-        return self.db.ItemInfoItem.insert(dict(item))
+        return self.db.item_info.insert(dict(item))
