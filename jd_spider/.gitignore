@@ -31,3 +31,5 @@ ghostdriver.log
 *.png
 *.html
 *.pyc
+
+project.egg-info/
