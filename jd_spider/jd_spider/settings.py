@@ -64,9 +64,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'jd_spider.pipelines.JdSpiderPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'jd_spider.jd_pipeline.JDBaseItemInfoPineline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,3 +88,12 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+MONGO_URI = "mongodb://127.0.0.1:27017"
+MONGO_DATABASE = "jb"
+
+#限速处理
+DOWNLOAD_DELAY=2
+AUTOTHROTTLE_ENABLE=True
+AUTOTHROTTLE_START_DELAY=5
+AUTOTHROTTLE_MAX_DELAY=60

@@ -32,6 +32,6 @@ class JDPageSpider(scrapy.Spider):
                 item_pic_url = item.xpath(".//div[@class='p-img']//img/@data-lazy-img").extract()[0]
             item_data_sku = item.xpath("./div/@data-sku").extract()[0]
 
-            item = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
+            item_info = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
                                 item_data_sku=item_data_sku)
-            yield item
+            yield item_info

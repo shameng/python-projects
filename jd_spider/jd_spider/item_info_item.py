@@ -14,7 +14,7 @@ class ItemInfoItem(scrapy.Item):
     # 商品在列表页排名
     item_rank = scrapy.Field()
     # 商品id
-    data_sku = scrapy.Field()
+    item_data_sku = scrapy.Field()
 
     item_name = scrapy.Field()
 
