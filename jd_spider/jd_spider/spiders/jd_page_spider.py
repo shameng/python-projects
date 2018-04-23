@@ -14,8 +14,8 @@ class JDPageSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.jd_pipeline.JDItemUrlPipeline': 200,
-            'jd_spider.jd_pipeline.JDBaseItemPersistencePipeline': 300,
+            'jd_spider.jd_item_persistence_pipeline.JDBaseItemPersistencePipeline': 200,
+            'jd_spider.jd_item_url_pipeline.JDItemUrlPipeline': 300,
         }
     }
 

@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 # ITEM_PIPELINES = {
-#    'jd_spider.jd_pipeline.JDBaseItemInfoPipeline': 300,
+#    'jd_spider.jd_item_persistence_pipeline.JDBaseItemPersistencePipeline': 300,
 # }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -89,6 +89,7 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+#Mongo
 MONGO_URI = "mongodb://127.0.0.1:27017"
 MONGO_DATABASE = "jb"
 
@@ -101,3 +102,4 @@ AUTOTHROTTLE_MAX_DELAY=60
 #Redis
 REDIS_HOST="127.0.0.1"
 REDIS_PORT=6379
+REDIS_KEY_ITEM_URL="jd:item:url"
