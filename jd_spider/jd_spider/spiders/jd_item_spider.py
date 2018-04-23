@@ -52,7 +52,7 @@ class JDItemSpider(scrapy.Spider):
         """
         item_url = self.get_item_url_from_redis()
         if item_url is None:
-            print("Redis的%s已经消费完毕" %(self.item_url_key))
+            print("Redis的%s已经消费完毕" % self.item_url_key)
         else:
             yield self.make_requests_from_url(item_url)
 
@@ -70,16 +70,11 @@ class JDItemSpider(scrapy.Spider):
 
         # 店铺评分
         store_score = response.xpath("//em[@class='evaluate-grade']//a/text()").extract()[0]
-        print("store_score", store_score)
-
+        # 店铺其他评分
         scores = response.xpath("//div[@class='score-detail']/em/text()").extract()
         store_items_score = scores[0]
         store_service_score = scores[1]
         store_logistics_score = scores[2]
-
-        print("store_items_score: ", store_items_score)
-        print("store_service_score: ", store_service_score)
-        print("store_logistics_score: ", store_logistics_score)
 
         item_data_sku = self.pattern.search(response.url).group()
 
@@ -94,9 +89,9 @@ class JDItemSpider(scrapy.Spider):
         # 调用下一个请求
         item_url = self.get_item_url_from_redis()
         if item_url is None:
-            print("Redis的%s已经消费完毕" % (self.item_url_key))
+            print("Redis的%s已经消费完毕" % self.item_url_key)
         else:
-            yield scrapy.Request(self.get_item_url_from_redis(), callback=self.parse)
+            yield scrapy.Request(item_url, callback=self.parse)
 
         yield item_info
 

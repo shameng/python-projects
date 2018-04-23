@@ -5,6 +5,7 @@
 @time: 2018/2/24 18:53
 """
 import scrapy
+import redis
 
 from jd_spider.item_info_item import ItemInfoItem
 
@@ -27,6 +28,20 @@ class JDPageSpider(scrapy.Spider):
 
     start_urls = ["https://list.jd.com/list.html?cat=1315,1343,9719"]
 
+    def __init__(self, redis_host, redis_port, item_sku_key):
+        self.redis_host = redis_host
+        self.redis_port = redis_port
+        self.item_sku_key = item_sku_key
+        self.pool = redis.ConnectionPool(host=self.redis_host, port=self.redis_port)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            redis_host=crawler.settings.get("REDIS_HOST"),
+            redis_port=crawler.settings.get("REDIS_PORT"),
+            item_sku_key=crawler.settings.get("REDIS_KEY_ITEM_SKU")
+        )
+
     def parse(self, response):
         items = response.xpath("//li[@class='gl-item']")
 
@@ -42,4 +57,12 @@ class JDPageSpider(scrapy.Spider):
 
             item_info = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
                                      item_data_sku=item_data_sku)
+
+            # 缓存sku
+            self.cache_item_sku(item_data_sku)
+
             yield item_info
+
+    def cache_item_sku(self, item_sku):
+        r = redis.Redis(connection_pool=self.pool)
+        r.rpush(self.item_sku_key, item_sku)
