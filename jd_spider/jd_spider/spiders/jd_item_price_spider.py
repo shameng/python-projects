@@ -75,6 +75,10 @@ class JDItemPriceSpider(scrapy.Spider):
             yield scrapy.Request(price_url, callback=self.parse)
 
     def get_price_url(self):
+        """
+        拼接查询价格的url
+        :return:
+        """
         r = redis.Redis(connection_pool=self.pool)
         skus = r.lrange(self.item_sku_key, self.offset * 60, self.offset * 60 + 59)
         print(len(skus))
