@@ -57,7 +57,6 @@ class JDItemPriceSpider(scrapy.Spider):
             yield self.make_requests_from_url(price_url)
 
     def parse(self, response):
-        print(response.body_as_unicode())
         price_infos = json.loads(response.body_as_unicode())
         for price_info in price_infos:
             data_sku = price_info["id"][2:]

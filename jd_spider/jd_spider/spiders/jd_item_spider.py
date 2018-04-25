@@ -4,7 +4,6 @@
 @author: xindemeng
 @time: 2018/2/24 18:53
 """
-import json
 import re
 
 import scrapy

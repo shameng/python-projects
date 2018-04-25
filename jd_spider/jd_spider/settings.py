@@ -91,7 +91,7 @@ ROBOTSTXT_OBEY = True
 
 #Mongo
 MONGO_URI = "mongodb://127.0.0.1:27017"
-MONGO_DATABASE = "jb"
+MONGO_DATABASE = "jd"
 
 #限速处理
 DOWNLOAD_DELAY=2
@@ -104,3 +104,6 @@ REDIS_HOST="127.0.0.1"
 REDIS_PORT=6379
 REDIS_KEY_ITEM_URL="jd:item:url"
 REDIS_KEY_ITEM_SKU="jd:item:sku"
+REDIS_KEY_ITEM_COMMENT_SKU="jd:item:comment:sku"
+# 用于去重
+REDIS_KEY_ITEM_COMMENT_ID_KEY="jd:item:comment:id"
