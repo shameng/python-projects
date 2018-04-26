@@ -26,7 +26,8 @@ class JDPageSpider(scrapy.Spider):
     # 允许的域名
     allowed_domains = ["jd.com"]
 
-    start_urls = ["https://list.jd.com/list.html?cat=1315,1343,9719"]
+    base_page_url = "https://list.jd.com/list.html?cat=1315,1343,9719"
+    offset = 1
 
     def __init__(self, redis_host, redis_port, item_sku_key, item_sku_comment_key):
         self.redis_host = redis_host
@@ -43,6 +44,17 @@ class JDPageSpider(scrapy.Spider):
             item_sku_key=crawler.settings.get("REDIS_KEY_ITEM_SKU"),
             item_sku_comment_key=crawler.settings.get("REDIS_KEY_ITEM_COMMENT_SKU"),
         )
+
+    def start_requests(self):
+        """
+        重写该方法
+        :return:
+        """
+        page_url = self.get_page_url()
+        if page_url is None:
+            print("页面已经全部爬取完毕")
+        else:
+            yield self.make_requests_from_url(page_url)
 
     def parse(self, response):
         items = response.xpath("//li[@class='gl-item']")
@@ -65,7 +77,26 @@ class JDPageSpider(scrapy.Spider):
 
             yield item_info
 
+        # 调用下一个请求
+        self.offset = self.offset + 1
+        page_url = self.get_page_url()
+        if page_url is None:
+            print("页面已经全部爬取完毕")
+        else:
+            yield self.make_requests_from_url(page_url)
+
     def cache_item_sku(self, item_sku):
         r = redis.Redis(connection_pool=self.pool)
         r.rpush(self.item_sku_key, item_sku)
         r.rpush(self.item_sku_comment_key, item_sku)
+
+    def get_page_url(self):
+        print("offset: %d" % self.offset)
+        if self.offset == 1:
+            return self.base_page_url
+        elif self.offset == 2:
+            return self.base_page_url + "&page=2&sort=sort_rank_asc&trans=1&JL=6_0_0&ms=6"
+        elif self.offset > 0 and self.offset < 300:
+            return self.base_page_url + "&page=%s&sort=sort_rank_asc&trans=1&JL=6_0_0" % self.offset
+        else:
+            return None

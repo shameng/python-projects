@@ -74,6 +74,7 @@ class JDItemPriceSpider(scrapy.Spider):
             yield scrapy.Request(price_url, callback=self.parse)
 
     def get_price_url(self):
+        print("offset: %d" % self.offset)
         """
         拼接查询价格的url
         :return:
