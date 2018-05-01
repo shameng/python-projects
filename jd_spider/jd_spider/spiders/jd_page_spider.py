@@ -7,8 +7,11 @@
 import scrapy
 import redis
 
+import logging
+
 from jd_spider.item_info_item import ItemInfoItem
 
+logger = logging.getLogger(__name__)
 
 class JDPageSpider(scrapy.Spider):
 
@@ -27,7 +30,7 @@ class JDPageSpider(scrapy.Spider):
     allowed_domains = ["jd.com"]
 
     base_page_url = "https://list.jd.com/list.html?cat=1315,1343,9719"
-    offset = 1
+    offset = 116
 
     def __init__(self, redis_host, redis_port, item_sku_key, item_sku_comment_key):
         self.redis_host = redis_host
@@ -57,33 +60,39 @@ class JDPageSpider(scrapy.Spider):
             yield self.make_requests_from_url(page_url)
 
     def parse(self, response):
-        items = response.xpath("//li[@class='gl-item']")
+        try:
+            items = response.xpath("//li[@class='gl-item']")
 
-        for item in items:
-            item_name = item.xpath(".//div[@class='p-name']//em/text()").extract()[0].strip()
-            item_url = item.xpath(".//div[@class='p-name']/a/@href").extract()[0]
-            pic_list = item.xpath(".//div[@class='p-img']//img/@src").extract()
-            if len(pic_list) > 0:
-                item_pic_url = pic_list[0]
+            for item in items:
+                item_name = item.xpath(".//div[@class='p-name']//em/text()").extract()[0].strip()
+                item_url = item.xpath(".//div[@class='p-name']/a/@href").extract()[0]
+                pic_list = item.xpath(".//div[@class='p-img']//img/@src").extract()
+                if len(pic_list) > 0:
+                    item_pic_url = pic_list[0]
+                else:
+                    item_pic_url = item.xpath(".//div[@class='p-img']//img/@data-lazy-img").extract()[0]
+                item_data_sku = item.xpath("./div/@data-sku").extract()[0]
+
+                item_info = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
+                                         item_data_sku=item_data_sku)
+
+                # 缓存sku
+                self.cache_item_sku(item_data_sku)
+
+                yield item_info
+
+            # 调用下一个请求
+            self.offset = self.offset + 1
+            page_url = self.get_page_url()
+            if page_url is None:
+                print("页面已经全部爬取完毕")
             else:
-                item_pic_url = item.xpath(".//div[@class='p-img']//img/@data-lazy-img").extract()[0]
-            item_data_sku = item.xpath("./div/@data-sku").extract()[0]
-
-            item_info = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
-                                     item_data_sku=item_data_sku)
-
-            # 缓存sku
-            self.cache_item_sku(item_data_sku)
-
-            yield item_info
-
-        # 调用下一个请求
-        self.offset = self.offset + 1
-        page_url = self.get_page_url()
-        if page_url is None:
-            print("页面已经全部爬取完毕")
-        else:
-            yield self.make_requests_from_url(page_url)
+                yield self.make_requests_from_url(page_url)
+        except BaseException, e:
+            logger.error("error when parse", e.message)
+            req = response.request
+            req.meta["change_proxy"] = True
+            yield req
 
     def cache_item_sku(self, item_sku):
         r = redis.Redis(connection_pool=self.pool)
