@@ -30,7 +30,7 @@ class JDPageSpider(scrapy.Spider):
     allowed_domains = ["jd.com"]
 
     base_page_url = "https://list.jd.com/list.html?cat=1315,1343,9719"
-    offset = 116
+    offset = 117
 
     def __init__(self, redis_host, redis_port, item_sku_key, item_sku_comment_key):
         self.redis_host = redis_host
@@ -86,6 +86,7 @@ class JDPageSpider(scrapy.Spider):
             page_url = self.get_page_url()
             if page_url is None:
                 print("页面已经全部爬取完毕")
+                return
             else:
                 yield self.make_requests_from_url(page_url)
         except BaseException, e:

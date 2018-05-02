@@ -128,6 +128,37 @@ class SqlHelper(object):
         else:
             return query.order_by(Proxy.score.desc(), Proxy.speed).all()
 
+    def select_valid(self, count=None, conditions=None):
+        '''
+        conditions的格式是个字典。类似self.params
+        :param count:
+        :param conditions:
+        :return:
+        '''
+        if conditions:
+            conditon_list = []
+            for key in list(conditions.keys()):
+                if self.params.get(key, None):
+                    conditon_list.append(self.params.get(key) == conditions.get(key))
+            conditions = conditon_list
+        else:
+            conditions = []
+
+        query = self.session.query(Proxy.id, Proxy.ip, Proxy.port, Proxy.score, Proxy.protocol)
+        query = query.filter(Proxy.score > 0)
+        if len(conditions) > 0 and count:
+            for condition in conditions:
+                query = query.filter(condition)
+            return query.order_by(Proxy.score.desc(), Proxy.speed).limit(count).all()
+        elif count:
+            return query.order_by(Proxy.score.desc(), Proxy.speed).limit(count).all()
+        elif len(conditions) > 0:
+            for condition in conditions:
+                query = query.filter(condition)
+            return query.order_by(Proxy.score.desc(), Proxy.speed).all()
+        else:
+            return query.order_by(Proxy.score.desc(), Proxy.speed).all()
+
 
     def close(self):
         pass

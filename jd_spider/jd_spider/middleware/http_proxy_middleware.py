@@ -40,7 +40,7 @@ class HttpProxyMiddleware(object):
         # 上一次抓新代理的时间
         self.last_fetch_proxy_time = datetime.now()
         # 每隔固定时间强制抓取新代理(min)
-        self.fetch_proxy_interval = 120
+        self.fetch_proxy_interval = 30
         # 一个将被设为invalid的代理如果已经成功爬取大于这个参数的页面， 将不会被invalid
         self.invalid_proxy_threshold = 200
         # 使用http代理还是https代理
@@ -58,7 +58,7 @@ class HttpProxyMiddleware(object):
         #                                 "count": 0})
         # 从数据库获取代理
         self.sqlhelper = SqlHelper()
-        for proxy in self.sqlhelper.select(count=50, conditions={"country": "国内", "protocol": 0}):
+        for proxy in self.sqlhelper.select_valid(count=50, conditions={"country": "国内", "protocol": 0}):
             self.proxys.append(Proxy(id=proxy.id, ip=proxy.ip, port=proxy.port, score=proxy.score, protocol=proxy.protocol))
 
 
@@ -106,8 +106,10 @@ class HttpProxyMiddleware(object):
         '''
         logger.info("reset proxy from db...")
         self.proxys = [Proxy(id=-1, ip=None, port=None, score=-1)]
-        for proxy in self.sqlhelper.select(count=50, conditions={"country": "国内", "protocol": 0}):
+        for proxy in self.sqlhelper.select_valid(count=50, conditions={"country": "国内", "protocol": 0}):
             self.proxys.append(Proxy(id=proxy.id, ip=proxy.ip, port=proxy.port, score=proxy.score))
+
+        self.last_fetch_proxy_time = datetime.now()
 
     def inc_proxy_index(self, current=-1):
         """
