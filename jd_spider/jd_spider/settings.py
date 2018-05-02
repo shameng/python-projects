@@ -130,15 +130,17 @@ MY_USER_AGENTS = [
     "Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10"
 ]
 
-#Mongo
-MONGO_URI = "mongodb://127.0.0.1:27017"
-MONGO_DATABASE = "jd"
-
 #限速处理
-DOWNLOAD_DELAY=3
+DOWNLOAD_DELAY = 3
 AUTOTHROTTLE_ENABLE=True
 AUTOTHROTTLE_START_DELAY=5
 AUTOTHROTTLE_MAX_DELAY=60
+#禁用cookie
+COOKIES_ENABLED = False
+
+#Mongo
+MONGO_URI = "mongodb://127.0.0.1:27017"
+MONGO_DATABASE = "jd"
 
 #Redis
 REDIS_HOST="127.0.0.1"

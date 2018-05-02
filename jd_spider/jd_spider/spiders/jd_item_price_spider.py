@@ -61,7 +61,7 @@ class JDItemPriceSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            price_infos = json.loads(response.body_as_unicode())
+            price_infos = json.loads(response.body)
             for price_info in price_infos:
                 data_sku = price_info["id"][2:]
                 item_info = ItemInfo(item_price=price_info["p"], item_data_sku=data_sku)
