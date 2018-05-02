@@ -19,7 +19,7 @@ class JDItemCommentSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemCommentPipeline': 200,
+            'jd_spider.pipeline.jd_item_comment_pipeline.JDItemCommentPipeline': 200,
         }
     }
 

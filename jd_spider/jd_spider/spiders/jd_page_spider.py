@@ -13,6 +13,7 @@ from jd_spider.item.item_info import ItemInfo
 
 logger = logging.getLogger(__name__)
 
+
 class JDPageSpider(scrapy.Spider):
 
     # 自定义配置

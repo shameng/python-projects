@@ -17,7 +17,7 @@ class JDItemSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemUpdatePipeline': 200,
+            'jd_spider.pipeline.jd_item_update_pipeline.JDItemUpdatePipeline': 200,
         }
     }
 

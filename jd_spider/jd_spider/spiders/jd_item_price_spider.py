@@ -9,15 +9,18 @@ import redis
 
 import time
 import json
+import logging
 
 from jd_spider.item.item_info import ItemInfo
+
+logger = logging.getLogger(__name__)
 
 
 class JDItemPriceSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemPricePipeline': 200,
+            'jd_spider.pipeline.jd_item_price_pipeline.JDItemPricePipeline': 200,
         }
     }
 
@@ -57,21 +60,28 @@ class JDItemPriceSpider(scrapy.Spider):
             yield self.make_requests_from_url(price_url)
 
     def parse(self, response):
-        price_infos = json.loads(response.body_as_unicode())
-        for price_info in price_infos:
-            data_sku = price_info["id"][2:]
-            item_info = ItemInfo(item_price=price_info["p"], item_data_sku=data_sku)
+        try:
+            price_infos = json.loads(response.body_as_unicode())
+            for price_info in price_infos:
+                data_sku = price_info["id"][2:]
+                item_info = ItemInfo(item_price=price_info["p"], item_data_sku=data_sku)
 
-            yield item_info
+                yield item_info
 
-        self.offset = self.offset + 1
+            self.offset = self.offset + 1
 
-        # 调用下一个请求
-        price_url = self.get_price_url()
-        if price_url is None:
-            print("Redis的%s已经消费完毕" % self.item_sku_key)
-        else:
-            yield scrapy.Request(price_url, callback=self.parse)
+            # 调用下一个请求
+            price_url = self.get_price_url()
+            if price_url is None:
+                print("Redis的%s已经消费完毕" % self.item_sku_key)
+                return
+            else:
+                yield scrapy.Request(price_url, callback=self.parse)
+        except BaseException, e:
+            logger.error("error when parse", e.message)
+            req = response.request
+            req.meta["change_proxy"] = True
+            yield req
 
     def get_price_url(self):
         print("offset: %d" % self.offset)
@@ -85,14 +95,14 @@ class JDItemPriceSpider(scrapy.Spider):
         if len(skus) == 0:
             return None
 
-        skuIds = ""
+        sku_ids = ""
         for sku in skus:
-            skuIds += ("J_" + sku + ",")
-        skuIds = skuIds[0:-1]
-        print(skuIds)
+            sku_ids += ("J_" + sku + ",")
+        sku_ids = sku_ids[0:-1]
+        print(sku_ids)
 
         t = time.time()
         # 毫秒级时间戳
         timestamp = int(round(t * 1000))
 
-        return self.price_url_pattern %(skuIds, timestamp)
+        return self.price_url_pattern % (sku_ids, timestamp)
