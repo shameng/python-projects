@@ -9,7 +9,7 @@ import re
 import scrapy
 import redis
 
-from jd_spider.item_info_item import ItemInfoItem
+from jd_spider.item.item_info import ItemInfo
 
 
 class JDItemSpider(scrapy.Spider):
@@ -17,7 +17,7 @@ class JDItemSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.jd_item_update_pipeline.JDItemUpdatePipeline': 200,
+            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemUpdatePipeline': 200,
         }
     }
 
@@ -77,7 +77,7 @@ class JDItemSpider(scrapy.Spider):
 
         item_data_sku = self.pattern.search(response.url).group()
 
-        item_info = ItemInfoItem()
+        item_info = ItemInfo()
         item_info["item_data_sku"] = item_data_sku
         item_info["item_info"] = info_dict
         item_info["store_score"] = store_score

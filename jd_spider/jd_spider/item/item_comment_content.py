@@ -7,7 +7,7 @@
 import scrapy
 
 
-class ItemCommentContentItem(scrapy.Item):
+class ItemCommentContent(scrapy.Item):
 
 
     id = scrapy.Field()

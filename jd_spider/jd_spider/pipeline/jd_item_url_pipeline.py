@@ -8,7 +8,7 @@
 
 import redis
 
-from jd_spider.item_info_item import ItemInfoItem
+from jd_spider.item.item_info import ItemInfo
 
 class JDItemUrlPipeline(object):
 
@@ -32,7 +32,7 @@ class JDItemUrlPipeline(object):
         self.pool.disconnect()
 
     def process_item(self, item, spider):
-        if isinstance(item, ItemInfoItem):
+        if isinstance(item, ItemInfo):
             self.cache_item_url(item)
         return item
 

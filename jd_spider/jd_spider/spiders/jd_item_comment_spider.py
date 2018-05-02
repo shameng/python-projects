@@ -10,8 +10,8 @@ import redis
 import re
 import json
 
-from jd_spider.item_comment_content_item import ItemCommentContentItem
-from jd_spider.item_comment_item import ItemCommentItem
+from jd_spider.item.item_comment_content import ItemCommentContent
+from jd_spider.item.item_comment import ItemComment
 
 
 class JDItemCommentSpider(scrapy.Spider):
@@ -19,7 +19,7 @@ class JDItemCommentSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.jd_item_comment_pipeline.JDItemCommentPipeline': 200,
+            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemCommentPipeline': 200,
         }
     }
 
@@ -67,7 +67,7 @@ class JDItemCommentSpider(scrapy.Spider):
 
         comment_info = json.loads(response.body_as_unicode())
 
-        item_comment = ItemCommentItem()
+        item_comment = ItemComment()
         item_comment["image_list_count"] = comment_info.get("imageListCount")
 
         product_comment_summary = comment_info.get("productCommentSummary")
@@ -99,7 +99,7 @@ class JDItemCommentSpider(scrapy.Spider):
 
         comments = []
         for comment in comment_info.get("comments"):
-            comment_content = ItemCommentContentItem()
+            comment_content = ItemCommentContent()
             comment_content["sku_id"] = sku_id
             comment_content["create_time"] = comment.get("creationTime")
             comment_content["content"] = comment.get("content")

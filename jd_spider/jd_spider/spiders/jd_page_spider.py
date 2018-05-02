@@ -9,7 +9,7 @@ import redis
 
 import logging
 
-from jd_spider.item_info_item import ItemInfoItem
+from jd_spider.item.item_info import ItemInfo
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ class JDPageSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.jd_item_persistence_pipeline.JDBaseItemPersistencePipeline': 200,
-            'jd_spider.jd_item_url_pipeline.JDItemUrlPipeline': 300,
+            'jd_spider.pipeline.jd_item_persistence_pipeline.JDBaseItemPersistencePipeline': 200,
+            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemUrlPipeline': 300,
         }
     }
 
@@ -73,8 +73,8 @@ class JDPageSpider(scrapy.Spider):
                     item_pic_url = item.xpath(".//div[@class='p-img']//img/@data-lazy-img").extract()[0]
                 item_data_sku = item.xpath("./div/@data-sku").extract()[0]
 
-                item_info = ItemInfoItem(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
-                                         item_data_sku=item_data_sku)
+                item_info = ItemInfo(item_name=item_name, item_url=item_url, item_pic_url=item_pic_url,
+                                     item_data_sku=item_data_sku)
 
                 # 缓存sku
                 self.cache_item_sku(item_data_sku)

@@ -8,8 +8,8 @@
 import pymongo
 import redis
 
-from jd_spider.item_comment_content_item import ItemCommentContentItem
-from jd_spider.item_comment_item import ItemCommentItem
+from jd_spider.item.item_comment_content import ItemCommentContent
+from jd_spider.item.item_comment import ItemComment
 
 
 class JDItemCommentPipeline(object):
@@ -41,7 +41,7 @@ class JDItemCommentPipeline(object):
         self.pool.disconnect()
 
     def process_item(self, item, spider):
-        if isinstance(item, ItemCommentItem):
+        if isinstance(item, ItemComment):
             comments = item.get("comments")
             ids = self.save_comment_contents(comments)
             print(ids)
@@ -59,7 +59,7 @@ class JDItemCommentPipeline(object):
         if isinstance(comments, list):
             r = redis.Redis(connection_pool=self.pool)
             for comment in comments:
-                if isinstance(comment, ItemCommentContentItem):
+                if isinstance(comment, ItemCommentContent):
                     # 去重
                     if r.sadd(self.item_comment_id_key, comment["jd_comment_id"]) > 0:
                         comment_contents.append(dict(comment))

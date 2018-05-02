@@ -6,7 +6,7 @@
 """
 import pymongo
 
-from jd_spider.item_info_item import ItemInfoItem
+from jd_spider.item.item_info import ItemInfo
 
 
 class JDItemPricePipeline(object):
@@ -30,7 +30,7 @@ class JDItemPricePipeline(object):
         self.client.close()
 
     def process_item(self, item, spider):
-        if isinstance(item, ItemInfoItem):
+        if isinstance(item, ItemInfo):
             self.update_item_price(item)
         return item
 

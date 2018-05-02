@@ -10,14 +10,14 @@ import redis
 import time
 import json
 
-from jd_spider.item_info_item import ItemInfoItem
+from jd_spider.item.item_info import ItemInfo
 
 
 class JDItemPriceSpider(scrapy.Spider):
     # 自定义配置
     custom_settings = {
         'ITEM_PIPELINES': {
-            'jd_spider.jd_item_price_pipeline.JDItemPricePipeline': 200,
+            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemPricePipeline': 200,
         }
     }
 
@@ -60,7 +60,7 @@ class JDItemPriceSpider(scrapy.Spider):
         price_infos = json.loads(response.body_as_unicode())
         for price_info in price_infos:
             data_sku = price_info["id"][2:]
-            item_info = ItemInfoItem(item_price=price_info["p"], item_data_sku=data_sku)
+            item_info = ItemInfo(item_price=price_info["p"], item_data_sku=data_sku)
 
             yield item_info
 

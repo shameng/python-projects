@@ -8,7 +8,7 @@
 import scrapy
 
 
-class ItemInfoItem(scrapy.Item):
+class ItemInfo(scrapy.Item):
 
     id = scrapy.Field()
     # 商品在列表页排名
