@@ -28,6 +28,8 @@ class ItemInfo(scrapy.Item):
     # 商品详细描述
     item_info = scrapy.Field()
 
+    # 是否是京东自营，如果是京东自营就没有以下评分了
+    self_support = scrapy.Field()
     # 店铺评分
     store_score = scrapy.Field()
     # 店铺商品评分

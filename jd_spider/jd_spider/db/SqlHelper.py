@@ -149,15 +149,15 @@ class SqlHelper(object):
         if len(conditions) > 0 and count:
             for condition in conditions:
                 query = query.filter(condition)
-            return query.order_by(Proxy.score.desc(), Proxy.speed).limit(count).all()
+            return query.order_by(Proxy.id.desc(), Proxy.score.desc(), Proxy.speed.desc()).limit(count).all()
         elif count:
-            return query.order_by(Proxy.score.desc(), Proxy.speed).limit(count).all()
+            return query.order_by(Proxy.id.desc(), Proxy.score.desc(), Proxy.speed.desc()).limit(count).all()
         elif len(conditions) > 0:
             for condition in conditions:
                 query = query.filter(condition)
-            return query.order_by(Proxy.score.desc(), Proxy.speed).all()
+            return query.order_by(Proxy.score.desc(), Proxy.speed.desc()).all()
         else:
-            return query.order_by(Proxy.score.desc(), Proxy.speed).all()
+            return query.order_by(Proxy.score.desc(), Proxy.speed.desc()).all()
 
 
     def close(self):

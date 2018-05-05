@@ -9,6 +9,12 @@ from twisted.web._newclient import ResponseNeverReceived
 from twisted.internet.error import TimeoutError, ConnectionRefusedError, ConnectError
 
 from jd_spider.db.SqlHelper import SqlHelper, Proxy
+from jd_spider.redis_factory import redis_factory
+from jd_spider.settings import REDIS_KEY_URL_ERROR, REDIS_KEY_ITEM_URL
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +51,10 @@ class HttpProxyMiddleware(object):
         self.invalid_proxy_threshold = 200
         # 使用http代理还是https代理
         self.use_https = use_https
+        # 最大的301重定向次数
+        self.max_redirect_301_count = 1
+        self.max_redirect_302_count = 7
+        self.max_exception_url_count = 5
         # 从文件读取初始代理
         # if os.path.exists(self.proxy_file):
         #     with open(self.proxy_file, "r") as fd:
@@ -60,7 +70,6 @@ class HttpProxyMiddleware(object):
         self.sqlhelper = SqlHelper()
         for proxy in self.sqlhelper.select_valid(count=50, conditions={"country": "国内", "protocol": 0}):
             self.proxys.append(Proxy(id=proxy.id, ip=proxy.ip, port=proxy.port, score=proxy.score, protocol=proxy.protocol))
-
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -107,7 +116,7 @@ class HttpProxyMiddleware(object):
         logger.info("reset proxy from db...")
         self.proxys = [Proxy(id=-1, ip=None, port=None, score=-1)]
         for proxy in self.sqlhelper.select_valid(count=50, conditions={"country": "国内", "protocol": 0}):
-            self.proxys.append(Proxy(id=proxy.id, ip=proxy.ip, port=proxy.port, score=proxy.score))
+            self.proxys.append(Proxy(id=proxy.id, ip=proxy.ip, port=proxy.port, score=proxy.score, protocol=proxy.protocol))
 
         self.last_fetch_proxy_time = datetime.now()
 
@@ -162,8 +171,13 @@ class HttpProxyMiddleware(object):
 
         if proxy.get_proxy():
             request.meta["proxy"] = proxy.get_proxy()
+
+            # if "count" not in request.meta.keys():
+            #     request.meta["count"] = 1
         elif "proxy" in request.meta.keys():
             del request.meta["proxy"]
+            # del request.meta["count"]
+            del request.meta["ex_count"]
         request.meta["proxy_index"] = self.proxy_index
         # proxy["count"] += 1
 
@@ -215,10 +229,34 @@ class HttpProxyMiddleware(object):
         # status不是正常的200而且不在spider声明的正常爬取过程中可能出现的
         # status列表中, 则认为代理无效, 切换代理
         if response.status != 200:
-            if response.status == 302:
+            if response.status == 302 or response.status == 301:
                 proxy = self.proxys[request.meta["proxy_index"]]
-                print("response status is 302, subtract score, proxy: %s, score: %d" % (proxy.get_proxy(), proxy.score))
+                logger.info("response status is 302 or 301, subtract score, proxy: %s, score: %d" % (proxy.get_proxy(), proxy.score))
                 proxy.score = proxy.score - 1
+
+                if response.status == 301:
+                    # request.meta["count"] += 1
+                    # if request.meta["count"] > self.max_redirect_301_count:
+                    logger.info("beyond max 301 redirect count, url: %s, request next url" % response.url)
+                    redis_factory.get_instance().rpush(REDIS_KEY_URL_ERROR, response.url)
+                    request.meta["count"] = 0
+                    request.meta["change_url"] = True
+                    response.status = 200
+                    return response
+
+                if response.status == 302:
+                    if "2_count" not in request.meta.keys():
+                        request.meta["2_count"] = 1
+                    else:
+                        request.meta["2_count"] += 1
+                    if request.meta["2_count"] > self.max_redirect_302_count:
+                        logger.info("beyond max 302 redirect count, url: %s, request next url" % response.url)
+                        redis_factory.get_instance().rpush(REDIS_KEY_URL_ERROR, response.url)
+                        request.meta["2_count"] = 0
+                        request.meta["change_url"] = True
+                        response.status = 200
+                        return response
+
                 self.inc_proxy_index()
             elif not hasattr(spider, "website_possible_httpstatus_list") \
                              or response.status not in spider.website_possible_httpstatus_list:
@@ -236,7 +274,7 @@ class HttpProxyMiddleware(object):
         """
         print("%s" % self.proxys[request.meta["proxy_index"]].get_proxy())
         print("%s" % exception)
-        logger.debug("%s exception: %s" % (self.proxys[request.meta["proxy_index"]].get_proxy(), exception))
+        # logger.debug("%s exception: %s" % (self.proxys[request.meta["proxy_index"]].get_proxy(), exception))
         request_proxy_index = request.meta["proxy_index"]
 
         # 只有当proxy_index>fixed_proxy-1时才进行比较, 这样能保证至少本地直连是存在的.
@@ -246,7 +284,23 @@ class HttpProxyMiddleware(object):
             else:               # 简单的切换而不禁用
                 if request.meta["proxy_index"] == self.proxy_index:
                     self.inc_proxy_index()
+
             new_request = request.copy()
+
+            if "ex_count" not in request.meta.keys():
+                new_request.meta["ex_count"] = 1
+            else:
+                new_request.meta["ex_count"] = request.meta["ex_count"] + 1
+            if new_request.meta["ex_count"] > self.max_exception_url_count:
+                logger.info("beyond max exception url count, url: %s, request next url" % request.url)
+                r = redis_factory.get_instance()
+                r.rpush(REDIS_KEY_URL_ERROR, request.url)
+                next_url = r.lpop(REDIS_KEY_ITEM_URL)
+                if not next_url:
+                    return None
+                new_request = request.replace(url=next_url)
+                new_request.meta["ex_count"] = 0
+
             new_request.dont_filter = True
             return new_request
         else:

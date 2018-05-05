@@ -150,3 +150,4 @@ REDIS_KEY_ITEM_SKU="jd:item:sku"
 REDIS_KEY_ITEM_COMMENT_SKU="jd:item:comment:sku"
 # 用于去重
 REDIS_KEY_ITEM_COMMENT_ID_KEY="jd:item:comment:id"
+REDIS_KEY_URL_ERROR = "jd:item:url:error"

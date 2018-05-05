@@ -78,7 +78,7 @@ class JDItemPriceSpider(scrapy.Spider):
             else:
                 yield scrapy.Request(price_url, callback=self.parse)
         except BaseException, e:
-            logger.error("error when parse", e.message)
+            logger.error("error when parse, msg: %s" % e.message)
             req = response.request
             req.meta["change_proxy"] = True
             yield req
