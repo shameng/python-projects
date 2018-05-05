@@ -10,7 +10,7 @@ from twisted.internet.error import TimeoutError, ConnectionRefusedError, Connect
 
 from jd_spider.db.SqlHelper import SqlHelper, Proxy
 from jd_spider.redis_factory import redis_factory
-from jd_spider.settings import REDIS_KEY_URL_ERROR, REDIS_KEY_ITEM_URL
+from jd_spider.settings import REDIS_KEY_URL_301, REDIS_KEY_ITEM_URL, REDIS_KEY_URL_EXCEPTION, REDIS_KEY_URL_302
 
 import sys
 reload(sys)
@@ -238,7 +238,7 @@ class HttpProxyMiddleware(object):
                     # request.meta["count"] += 1
                     # if request.meta["count"] > self.max_redirect_301_count:
                     logger.info("beyond max 301 redirect count, url: %s, request next url" % response.url)
-                    redis_factory.get_instance().rpush(REDIS_KEY_URL_ERROR, response.url)
+                    redis_factory.get_instance().rpush(REDIS_KEY_URL_301, response.url)
                     request.meta["count"] = 0
                     request.meta["change_url"] = True
                     response.status = 200
@@ -251,7 +251,7 @@ class HttpProxyMiddleware(object):
                         request.meta["2_count"] += 1
                     if request.meta["2_count"] > self.max_redirect_302_count:
                         logger.info("beyond max 302 redirect count, url: %s, request next url" % response.url)
-                        redis_factory.get_instance().rpush(REDIS_KEY_URL_ERROR, response.url)
+                        redis_factory.get_instance().rpush(REDIS_KEY_URL_302, response.url)
                         request.meta["2_count"] = 0
                         request.meta["change_url"] = True
                         response.status = 200
@@ -294,7 +294,7 @@ class HttpProxyMiddleware(object):
             if new_request.meta["ex_count"] > self.max_exception_url_count:
                 logger.info("beyond max exception url count, url: %s, request next url" % request.url)
                 r = redis_factory.get_instance()
-                r.rpush(REDIS_KEY_URL_ERROR, request.url)
+                r.rpush(REDIS_KEY_URL_EXCEPTION, request.url)
                 next_url = r.lpop(REDIS_KEY_ITEM_URL)
                 if not next_url:
                     return None
