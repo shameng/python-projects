@@ -5,12 +5,14 @@ import logging
 from datetime import datetime, timedelta
 
 from scrapy.core.downloader.handlers.http11 import TunnelError
+from scrapy.exceptions import IgnoreRequest
+from scrapy.http import Response
 from twisted.web._newclient import ResponseNeverReceived
 from twisted.internet.error import TimeoutError, ConnectionRefusedError, ConnectError
 
 from jd_spider.db.SqlHelper import SqlHelper, Proxy
 from jd_spider.redis_factory import redis_factory
-from jd_spider.settings import REDIS_KEY_URL_301, REDIS_KEY_ITEM_URL, REDIS_KEY_URL_EXCEPTION, REDIS_KEY_URL_302
+from jd_spider.settings import REDIS_KEY_URL_301, REDIS_KEY_URL_EXCEPTION, REDIS_KEY_URL_302
 
 import sys
 reload(sys)
@@ -178,6 +180,7 @@ class HttpProxyMiddleware(object):
             del request.meta["proxy"]
             # del request.meta["count"]
             del request.meta["ex_count"]
+            del request.meta["2_count"]
         request.meta["proxy_index"] = self.proxy_index
         # proxy["count"] += 1
 
@@ -239,7 +242,7 @@ class HttpProxyMiddleware(object):
                     # if request.meta["count"] > self.max_redirect_301_count:
                     logger.info("beyond max 301 redirect count, url: %s, request next url" % response.url)
                     redis_factory.get_instance().rpush(REDIS_KEY_URL_301, response.url)
-                    request.meta["count"] = 0
+                    # request.meta["count"] = 0
                     request.meta["change_url"] = True
                     response.status = 200
                     return response
@@ -256,6 +259,7 @@ class HttpProxyMiddleware(object):
                         request.meta["change_url"] = True
                         response.status = 200
                         return response
+                        # raise IgnoreRequest
 
                 self.inc_proxy_index()
             elif not hasattr(spider, "website_possible_httpstatus_list") \
@@ -285,23 +289,23 @@ class HttpProxyMiddleware(object):
                 if request.meta["proxy_index"] == self.proxy_index:
                     self.inc_proxy_index()
 
-            new_request = request.copy()
-
             if "ex_count" not in request.meta.keys():
-                new_request.meta["ex_count"] = 1
+                request.meta["ex_count"] = 1
             else:
-                new_request.meta["ex_count"] = request.meta["ex_count"] + 1
-            if new_request.meta["ex_count"] > self.max_exception_url_count:
+                request.meta["ex_count"] += 1
+            # 跳过抛出多次异常的请求
+            if request.meta["ex_count"] > self.max_exception_url_count:
                 logger.info("beyond max exception url count, url: %s, request next url" % request.url)
                 r = redis_factory.get_instance()
                 r.rpush(REDIS_KEY_URL_EXCEPTION, request.url)
-                next_url = r.lpop(REDIS_KEY_ITEM_URL)
-                if not next_url:
-                    return None
-                new_request = request.replace(url=next_url)
-                new_request.meta["ex_count"] = 0
+                request.meta["ex_count"] = 0
+                request.meta["change_url"] = True
+                response = Response(status=200, request=request, url=request.url)
+                return response
 
-            new_request.dont_filter = True
-            return new_request
+            request.dont_filter = True
+            return request
         else:
-            logger.error("can not handle the exception")
+            logger.error("this middleware can not handle the exception")
+            return None
+

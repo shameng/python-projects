@@ -28,7 +28,7 @@ class JDItemCommentPipeline(object):
             mongo_db=crawler.settings.get("MONGO_DATABASE", "jd"),
             redis_host=crawler.settings.get("REDIS_HOST"),
             redis_port=crawler.settings.get("REDIS_PORT"),
-            item_comment_id_key=crawler.settings.get("REDIS_KEY_ITEM_COMMENT_ID_KEY")
+            item_comment_id_key=crawler.settings.get("REDIS_KEY_ITEM_COMMENT_ID")
         )
 
     def open_spider(self, spider):
@@ -43,12 +43,10 @@ class JDItemCommentPipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, ItemComment):
             comments = item.get("comments")
-            ids = self.save_comment_contents(comments)
-            print(ids)
+            self.save_comment_contents(comments)
 
             id = self.save_comment(item)
             item["id"] = id
-            print(id)
 
         return item
 
@@ -70,10 +68,10 @@ class JDItemCommentPipeline(object):
             return None
 
     def save_comment(self, comment):
-        comm = self.db.item_comment.find({"sku_id": comment["sku_id"]})
-        if not comm or comm.count() == 0:
+        comm = self.db.item_comment.find_one({"sku_id": comment["sku_id"]})
+        if not comm:
             comment_dict = dict(comment)
             comment_dict.pop("comments")
             return self.db.item_comment.insert(comment_dict)
         else:
-            return comm[0]["sku_id"]
+            return comm.get("sku_id")
