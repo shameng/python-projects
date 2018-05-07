@@ -21,6 +21,7 @@ class ItemComment(scrapy.Item):
     default_good_count = scrapy.Field()
     comment_count = scrapy.Field()
     average_score = scrapy.Field()
+    # 晒图
     image_list_count = scrapy.Field()
 
     # 好评
@@ -42,5 +43,5 @@ class ItemComment(scrapy.Item):
     # 追评
     after_count = scrapy.Field()
 
-    # 评论
+    # 评论列表
     comments = scrapy.Field()
