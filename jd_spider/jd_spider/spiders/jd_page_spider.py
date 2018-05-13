@@ -20,7 +20,7 @@ class JDPageSpider(scrapy.Spider):
     custom_settings = {
         'ITEM_PIPELINES': {
             'jd_spider.pipeline.jd_item_persistence_pipeline.JDBaseItemPersistencePipeline': 200,
-            'jd_spider.pipeline.jd_item_persistence_pipeline.JDItemUrlPipeline': 300,
+            'jd_spider.pipeline.jd_item_url_pipeline.JDItemUrlPipeline': 300,
         }
     }
 
@@ -31,7 +31,7 @@ class JDPageSpider(scrapy.Spider):
     allowed_domains = ["jd.com"]
 
     base_page_url = "https://list.jd.com/list.html?cat=1315,1343,9719"
-    offset = 117
+    offset = 2
 
     def __init__(self, redis_host, redis_port, item_sku_key, item_sku_comment_key):
         self.redis_host = redis_host

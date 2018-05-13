@@ -132,26 +132,33 @@ MY_USER_AGENTS = [
 
 #限速处理
 DOWNLOAD_DELAY = 3
-AUTOTHROTTLE_ENABLE=True
-AUTOTHROTTLE_START_DELAY=5
-AUTOTHROTTLE_MAX_DELAY=60
+AUTOTHROTTLE_ENABLE = True
+AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_MAX_DELAY = 60
 #禁用cookie
 COOKIES_ENABLED = False
 
 #Mongo
 MONGO_URI = "mongodb://127.0.0.1:27017"
-MONGO_DATABASE = "jd"
+MONGO_DATABASE = "jd_test"
 
 #Redis
 REDIS_HOST="127.0.0.1"
 REDIS_PORT=6379
-REDIS_KEY_ITEM_URL="jd:item:url"
-REDIS_KEY_ITEM_SKU="jd:item:sku"
-REDIS_KEY_ITEM_COMMENT_SKU="jd:item:comment:sku"
+REDIS_KEY_ITEM_URL="jd:test:item:url"
+REDIS_KEY_ITEM_SKU="jd:test:item:sku"
+REDIS_KEY_ITEM_COMMENT_SKU="jd:test:item:comment:sku"
 # 用于去重
-REDIS_KEY_ITEM_COMMENT_ID = "jd:item:comment:id"
-REDIS_KEY_URL_ERROR = "jd:item:url:error"
-REDIS_KEY_URL_301 = "jd:item:comment:url:301"
-REDIS_KEY_URL_302 = "jd:item:comment:url:302"
-REDIS_KEY_URL_EXCEPTION = "jd:item:comment:url:exception"
-REDIS_KEY_COMMENT_CONTENT_URL = "jd:item:comment:content:url"
+REDIS_KEY_ITEM_COMMENT_ID = "jd:test:item:comment:id"
+REDIS_KEY_URL_ERROR = "jd:test:item:url:error"
+REDIS_KEY_URL_301 = "jd:test:item:comment:url:301"
+REDIS_KEY_URL_302 = "jd:test:item:comment:url:302"
+REDIS_KEY_URL_EXCEPTION = "jd:test:item:comment:url:exception"
+REDIS_KEY_COMMENT_CONTENT_URL = "jd:test:item:comment:content:url"
+
+# 使用 scrapy-redis 的调度器
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+# # 在 redis 中保持scrapy-redis用到的队列，从而允许暂停和暂停后恢复
+# SCHEDULER_PERSIST = True
+# # 使用scrapy-redis的去重方式
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"

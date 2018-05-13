@@ -164,12 +164,12 @@ class JDItemCommentSpider(scrapy.Spider):
                 return self.comment_url_pattern % (sku, "1")
 
     def push_comment_url(self, sku, max_page):
-        '''
+        """
         把该sku的评论url全部push到redis
         :param sku:
         :param max_page:
         :return:
-        '''
+        """
         if max_page > 1:
             r = redis.Redis(connection_pool=self.pool)
             for page in range(2, max_page + 1):
